@@ -26,6 +26,7 @@ const elements = {
   addMaterialButton: document.querySelector("#addMaterialButton"),
   addPrinterButton: document.querySelector("#addPrinterButton"),
   resetDataButton: document.querySelector("#resetDataButton"),
+  logoutButton: document.querySelector("#logoutButton"),
   saveProjectButton: document.querySelector("#saveProjectButton"),
   saveSettingsButton: document.querySelector("#saveSettingsButton"),
   exportQuoteButton: document.querySelector("#exportQuoteButton"),
@@ -116,6 +117,11 @@ async function api(path, options = {}) {
   });
 
   if (!response.ok) {
+    if (response.status === 401) {
+      window.location.href = "/login";
+      throw new Error("Sessão expirada.");
+    }
+
     const fallbackMessage = `Falha na requisição ${response.status}`;
     let message = fallbackMessage;
 
@@ -135,6 +141,16 @@ async function api(path, options = {}) {
   }
 
   return response.json();
+}
+
+async function logout() {
+  try {
+    await api("/api/auth/logout", { method: "POST" });
+  } catch (error) {
+    console.error(error);
+  } finally {
+    window.location.href = "/login";
+  }
 }
 
 function schedulePersist(key, action, delay = 350) {
@@ -933,6 +949,7 @@ function bindEvents() {
   elements.addMaterialButton.addEventListener("click", addMaterial);
   elements.addPrinterButton.addEventListener("click", addPrinter);
   elements.resetDataButton.addEventListener("click", restoreDefaults);
+  elements.logoutButton.addEventListener("click", logout);
   elements.saveProjectButton.addEventListener("click", saveProject);
   elements.exportQuoteButton.addEventListener("click", exportQuote);
 }

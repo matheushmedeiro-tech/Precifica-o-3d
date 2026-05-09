@@ -18,6 +18,12 @@ Aplicação web para precificação profissional de serviços de impressão 3D, 
 
 Os dados ficam no arquivo SQLite em `data/precificacao.sqlite`.
 
+## Proteção por login
+
+- O sistema agora exige login antes de abrir o painel.
+- Localmente, se você não definir variáveis de ambiente, o acesso padrão é `admin` / `admin123`.
+- Em produção, configure `APP_USERNAME`, `APP_PASSWORD` e `SESSION_SECRET`.
+
 ## O que o sistema calcula
 
 - Custo de material com desperdício
@@ -59,8 +65,9 @@ Fórmulas-chave:
 
 1. Suba esta pasta para um repositório GitHub.
 2. No Render, crie um novo serviço usando o `render.yaml` deste projeto.
-3. Mantenha o disco persistente habilitado, porque o SQLite fica em `data/`.
-4. Após o deploy, o app vai responder pela rota principal e pela verificação em `/api/bootstrap`.
+3. Preencha `APP_USERNAME` e `APP_PASSWORD` com o login desejado.
+4. Mantenha o disco persistente habilitado, porque o SQLite fica em `data/`.
+5. Após o deploy, o app vai responder pela rota principal e pela verificação em `/api/bootstrap`.
 
 ## Observações
 
