@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Precificação 3D Pro</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="hero">
+      <div class="hero-copy-block">
+        <p class="eyebrow">Sistema profissional para operação real</p>
+        <h1>Precificação 3D Pro</h1>
+        <p class="hero-copy">Um painel de precificação com cara de produto: abas separadas, fluxo guiado de orçamento, histórico local e estrutura pronta para deploy estático.</p>
+      </div>
+      <div class="hero-actions">
+        <button class="ghost-button" id="resetDataButton" type="button">Restaurar padrões</button>
+      </div>
+    </header>
+
+    <nav class="tab-bar" aria-label="Navegação principal">
+      <button class="tab-button active" type="button" data-tab-trigger="dashboard">Dashboard</button>
+      <button class="tab-button" type="button" data-tab-trigger="quote">Orçamento</button>
+      <button class="tab-button" type="button" data-tab-trigger="printers">Impressoras</button>
+      <button class="tab-button" type="button" data-tab-trigger="materials">Materiais</button>
+      <button class="tab-button" type="button" data-tab-trigger="costs">Custos gerais</button>
+      <button class="tab-button" type="button" data-tab-trigger="history">Histórico</button>
+    </nav>
+
+    <main class="tab-panels">
+      <section class="tab-panel active" data-tab-panel="dashboard">
+        <div class="dashboard-grid">
+          <section class="panel spotlight-panel">
+            <div class="section-heading">
+              <div>
+                <p class="section-kicker">Visão geral</p>
+                <h2>Painel de decisão</h2>
+              </div>
+              <span id="decisionBadge" class="decision-badge">Calculando</span>
+            </div>
+
+            <div class="stats-grid">
+              <article class="stat-card">
+                <span>Custo total bruto</span>
+                <strong id="grossCostValue">R$ 0,00</strong>
+                <small>Base real de produção</small>
+              </article>
+              <article class="stat-card emphasis">
+                <span>Preço ideal</span>
+                <strong id="idealPriceValue">R$ 0,00</strong>
+                <small>Preço final sugerido</small>
+              </article>
+              <article class="stat-card">
+                <span>Lucro por peça</span>
+                <strong id="profitPerPieceValue">R$ 0,00</strong>
+                <small>Já com taxa e desconto</small>
+              </article>
+              <article class="stat-card">
+                <span>Lucro total</span>
+                <strong id="totalProfitValue">R$ 0,00</strong>
+                <small>Resultado do lote</small>
+              </article>
+            </div>
+
+            <div class="results-grid">
+              <div class="breakdown-card">
+                <h3>Composição detalhada</h3>
+                <div id="costBreakdown" class="breakdown-list"></div>
+              </div>
+              <div class="breakdown-card">
+                <h3>Indicadores</h3>
+                <div class="indicator-list">
+                  <div>
+                    <span>Margem real</span>
+                    <strong id="realMarginValue">0%</strong>
+                  </div>
+                  <div>
+                    <span>Preço mínimo</span>
+                    <strong id="breakEvenValue">R$ 0,00</strong>
+                  </div>
+                  <div>
+                    <span>Taxas</span>
+                    <strong id="feeValue">R$ 0,00</strong>
+                  </div>
+                  <div>
+                    <span>Capacidade consumida</span>
+                    <strong id="capacityValue">0 h</strong>
+                  </div>
+                </div>
+                <button class="secondary-button full-width" id="exportQuoteButton" type="button">Exportar orçamento</button>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel compact-panel">
+            <div class="section-heading compact">
+              <div>
+                <p class="section-kicker">Operação</p>
+                <h2>Fila da farm</h2>
+              </div>
+            </div>
+            <div id="queueSummary" class="queue-grid"></div>
+          </section>
+
+          <section class="panel compact-panel">
+            <div class="section-heading compact">
+              <div>
+                <p class="section-kicker">Projeto atual</p>
+                <h2>Snapshot rápido</h2>
+              </div>
+            </div>
+            <div id="currentProjectSnapshot" class="snapshot-grid"></div>
+          </section>
+        </div>
+      </section>
+
+      <section class="tab-panel" data-tab-panel="quote">
+        <div class="quote-layout">
+          <section class="panel flow-panel">
+            <div class="section-heading">
+              <div>
+                <p class="section-kicker">Fluxo guiado</p>
+                <h2>Montar orçamento</h2>
+              </div>
+              <span class="section-badge accent">Passo a passo</span>
+            </div>
+
+            <div class="flow-steps" id="flowSteps">
+              <button class="flow-step active" type="button" data-step-trigger="0">
+                <strong>1</strong>
+                <span>Projeto</span>
+              </button>
+              <button class="flow-step" type="button" data-step-trigger="1">
+                <strong>2</strong>
+                <span>Produção</span>
+              </button>
+              <button class="flow-step" type="button" data-step-trigger="2">
+                <strong>3</strong>
+                <span>Opcionais</span>
+              </button>
+              <button class="flow-step" type="button" data-step-trigger="3">
+                <strong>4</strong>
+                <span>Fechamento</span>
+              </button>
+            </div>
+
+            <form id="quoteFlowForm" class="flow-content">
+              <section class="flow-stage active" data-step-panel="0">
+                <div class="stage-intro">
+                  <h3>Base do pedido</h3>
+                  <p>Escolha impressora, material e informações comerciais básicas.</p>
+                </div>
+                <div class="grid-form two-columns">
+                  <label>
+                    <span>Nome do projeto</span>
+                    <input id="projectName" type="text" placeholder="Ex.: Caixa técnica V3">
+                  </label>
+                  <label>
+                    <span>Quantidade</span>
+                    <input id="quantity" type="number" min="1" step="1">
+                  </label>
+                  <label>
+                    <span>Impressora</span>
+                    <select id="printerId"></select>
+                  </label>
+                  <label>
+                    <span>Material</span>
+                    <select id="materialId"></select>
+                  </label>
+                  <label>
+                    <span>Complexidade</span>
+                    <select id="complexity">
+                      <option value="low">Baixa</option>
+                      <option value="medium">Média</option>
+                      <option value="high">Alta</option>
+                    </select>
+                  </label>
+                  <label>
+                    <span>Observações comerciais</span>
+                    <input id="projectNotes" type="text" placeholder="Cor, prazo, camada, acabamento...">
+                  </label>
+                </div>
+              </section>
+
+              <section class="flow-stage" data-step-panel="1">
+                <div class="stage-intro">
+                  <h3>Produção da peça</h3>
+                  <p>Informe peso, tempo e suporte apenas se a peça realmente usar.</p>
+                </div>
+                <div class="grid-form two-columns">
+                  <label>
+                    <span>Peso do modelo (g)</span>
+                    <input id="modelWeightG" type="number" min="0" step="0.1">
+                  </label>
+                  <label>
+                    <span>Tempo de impressão por peça (h)</span>
+                    <input id="printTimeHours" type="number" min="0" step="0.01">
+                  </label>
+                </div>
+
+                <div class="toggle-card">
+                  <label class="toggle-line">
+                    <input id="supportEnabled" type="checkbox">
+                    <span>Adicionar custo de suporte</span>
+                  </label>
+                  <div class="grid-form two-columns dependent-fields" data-dependency="supportEnabled">
+                    <label>
+                      <span>Modo do suporte</span>
+                      <select id="supportMode">
+                        <option value="percent">% do peso</option>
+                        <option value="grams">Gramas adicionais</option>
+                      </select>
+                    </label>
+                    <label>
+                      <span>Valor do suporte</span>
+                      <input id="supportValue" type="number" min="0" step="0.1">
+                    </label>
+                  </div>
+                </div>
+              </section>
+
+              <section class="flow-stage" data-step-panel="2">
+                <div class="stage-intro">
+                  <h3>Serviços opcionais</h3>
+                  <p>Ative só o que faz parte do pedido. Se não precisa, desligue e o preço cai automaticamente.</p>
+                </div>
+
+                <div class="option-stack">
+                  <article class="toggle-card">
+                    <label class="toggle-line">
+                      <input id="postProcessingEnabled" type="checkbox">
+                      <span>Pós-processamento</span>
+                    </label>
+                    <div class="grid-form one-column dependent-fields" data-dependency="postProcessingEnabled">
+                      <label>
+                        <span>Horas de pós por peça</span>
+                        <input id="postProcessingHours" type="number" min="0" step="0.01">
+                      </label>
+                    </div>
+                  </article>
+
+                  <article class="toggle-card">
+                    <label class="toggle-line">
+                      <input id="paintingEnabled" type="checkbox">
+                      <span>Pintura / acabamento manual</span>
+                    </label>
+                    <div class="grid-form two-columns dependent-fields" data-dependency="paintingEnabled">
+                      <label>
+                        <span>Horas de pintura por peça</span>
+                        <input id="paintingHours" type="number" min="0" step="0.01">
+                      </label>
+                      <label>
+                        <span>Consumíveis de pintura por peça (R$)</span>
+                        <input id="paintingConsumablesPerPiece" type="number" min="0" step="0.01">
+                      </label>
+                    </div>
+                  </article>
+
+                  <article class="toggle-card compact-toggle-card">
+                    <label class="toggle-line">
+                      <input id="packagingEnabled" type="checkbox">
+                      <span>Incluir embalagem</span>
+                    </label>
+                    <small>Usa o custo padrão de embalagem definido em custos gerais.</small>
+                  </article>
+
+                  <article class="toggle-card compact-toggle-card">
+                    <label class="toggle-line">
+                      <input id="marketplaceEnabled" type="checkbox">
+                      <span>Venda com taxa de marketplace</span>
+                    </label>
+                    <small>Se desligar, o cálculo considera venda direta.</small>
+                  </article>
+                </div>
+              </section>
+
+              <section class="flow-stage" data-step-panel="3">
+                <div class="stage-intro">
+                  <h3>Fechamento comercial</h3>
+                  <p>Faça ajustes rápidos de cenário e desconto antes de salvar.</p>
+                </div>
+                <div class="grid-form two-columns">
+                  <label>
+                    <span>Desconto manual (%)</span>
+                    <input id="manualDiscountPercent" type="number" min="0" max="100" step="0.1">
+                  </label>
+                  <label>
+                    <span>Filamento simulado (R$/kg)</span>
+                    <input id="scenarioFilamentPriceKg" type="number" min="0" step="0.01" placeholder="Opcional">
+                  </label>
+                  <label>
+                    <span>Margem simulada (%)</span>
+                    <input id="scenarioMarginPercent" type="number" min="0" step="0.1" placeholder="Opcional">
+                  </label>
+                  <label>
+                    <span>Taxa simulada (%)</span>
+                    <input id="scenarioFeePercent" type="number" min="0" step="0.1" placeholder="Opcional">
+                  </label>
+                </div>
+                <div class="closing-callout">
+                  <p>O resumo financeiro ao lado atualiza em tempo real enquanto você fecha o orçamento.</p>
+                </div>
+              </section>
+            </form>
+
+            <div class="flow-actions">
+              <button class="ghost-button" id="prevStepButton" type="button">Voltar etapa</button>
+              <button class="primary-button" id="nextStepButton" type="button">Avançar etapa</button>
+            </div>
+          </section>
+
+          <aside class="panel quote-sidebar">
+            <div class="section-heading compact">
+              <div>
+                <p class="section-kicker">Resumo ao vivo</p>
+                <h2>Fechamento</h2>
+              </div>
+            </div>
+
+            <div class="quote-summary-card">
+              <span>Preço ideal</span>
+              <strong id="quoteSidebarPrice">R$ 0,00</strong>
+              <small id="quoteSidebarDecision">Preencha o fluxo para validar a margem.</small>
+            </div>
+
+            <div id="quoteSidebarBreakdown" class="breakdown-list compact-breakdown"></div>
+
+            <div class="indicator-list compact-indicators">
+              <div>
+                <span>Break-even</span>
+                <strong id="quoteSidebarBreakEven">R$ 0,00</strong>
+              </div>
+              <div>
+                <span>Lucro lote</span>
+                <strong id="quoteSidebarProfit">R$ 0,00</strong>
+              </div>
+            </div>
+
+            <div class="sidebar-actions">
+              <button class="primary-button full-width" id="saveProjectButton" type="button">Salvar projeto</button>
+              <button class="secondary-button full-width" id="quoteGoDashboardButton" type="button">Ver no dashboard</button>
+              <button class="ghost-button full-width" id="quoteGoHistoryButton" type="button">Abrir histórico</button>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="tab-panel" data-tab-panel="printers">
+        <section class="panel">
+          <div class="section-heading compact">
+            <div>
+              <p class="section-kicker">Farm</p>
+              <h2>Cadastro de impressoras</h2>
+            </div>
+            <button class="ghost-button" id="addPrinterButton" type="button">Nova impressora</button>
+          </div>
+          <p class="panel-lead">Cada impressora tem seu próprio consumo, depreciação, manutenção e disponibilidade.</p>
+          <div id="printerTable" class="table-card"></div>
+        </section>
+      </section>
+
+      <section class="tab-panel" data-tab-panel="materials">
+        <section class="panel">
+          <div class="section-heading compact">
+            <div>
+              <p class="section-kicker">Custos variáveis</p>
+              <h2>Materiais</h2>
+            </div>
+            <button class="ghost-button" id="addMaterialButton" type="button">Novo material</button>
+          </div>
+          <p class="panel-lead">Cadastre PLA, PETG, ABS ou perfis especiais com preço por kg e desperdício específico.</p>
+          <div id="materialTable" class="table-card"></div>
+        </section>
+      </section>
+
+      <section class="tab-panel" data-tab-panel="costs">
+        <section class="panel">
+          <div class="section-heading">
+            <div>
+              <p class="section-kicker">Base financeira</p>
+              <h2>Custos gerais do negócio</h2>
+            </div>
+            <div class="section-actions">
+              <span class="section-badge">Editável</span>
+              <button class="primary-button" id="saveSettingsButton" type="button">Salvar configurações</button>
+            </div>
+          </div>
+          <p class="panel-lead">Esses valores alimentam todos os cálculos do orçamento.</p>
+          <form id="settingsForm" class="grid-form two-columns">
+            <label>
+              <span>Preço padrão do filamento (R$/kg)</span>
+              <input data-setting="defaultFilamentPriceKg" type="number" min="0" step="0.01">
+            </label>
+            <label>
+              <span>Consumo padrão da impressora (W)</span>
+              <input data-setting="defaultPrinterPowerW" type="number" min="0" step="1">
+            </label>
+            <label>
+              <span>Custo do kWh (R$)</span>
+              <input data-setting="energyCostKwh" type="number" min="0" step="0.0001">
+            </label>
+            <label>
+              <span>Valor padrão da impressora (R$)</span>
+              <input data-setting="defaultPrinterValue" type="number" min="0" step="0.01">
+            </label>
+            <label>
+              <span>Vida útil da impressora (h)</span>
+              <input data-setting="defaultPrinterUsefulHours" type="number" min="1" step="1">
+            </label>
+            <label>
+              <span>Manutenção mensal média (R$)</span>
+              <input data-setting="defaultMaintenanceMonthly" type="number" min="0" step="0.01">
+            </label>
+            <label>
+              <span>Horas produtivas por mês</span>
+              <input data-setting="monthlyOperatingHours" type="number" min="1" step="1">
+            </label>
+            <label>
+              <span>Falhas médias (%)</span>
+              <input data-setting="failureRatePercent" type="number" min="0" max="99" step="0.1">
+            </label>
+            <label>
+              <span>Embalagem por pedido (R$)</span>
+              <input data-setting="packagingCostPerOrder" type="number" min="0" step="0.01">
+            </label>
+            <label>
+              <span>Taxa média de marketplace (%)</span>
+              <input data-setting="marketplaceFeePercent" type="number" min="0" max="99" step="0.1">
+            </label>
+            <label>
+              <span>Margem desejada (%)</span>
+              <input data-setting="desiredMarginPercent" type="number" min="0" max="500" step="0.1">
+            </label>
+            <label>
+              <span>Hora de trabalho humano (R$)</span>
+              <input data-setting="laborHourCost" type="number" min="0" step="0.01">
+            </label>
+            <label>
+              <span>Setup por pedido (min)</span>
+              <input data-setting="setupMinutesPerOrder" type="number" min="0" step="1">
+            </label>
+            <label>
+              <span>Complexidade baixa (%)</span>
+              <input data-setting="complexityLowPercent" type="number" min="0" max="100" step="0.1">
+            </label>
+            <label>
+              <span>Complexidade média (%)</span>
+              <input data-setting="complexityMediumPercent" type="number" min="0" max="100" step="0.1">
+            </label>
+            <label>
+              <span>Complexidade alta (%)</span>
+              <input data-setting="complexityHighPercent" type="number" min="0" max="100" step="0.1">
+            </label>
+          </form>
+        </section>
+      </section>
+
+      <section class="tab-panel" data-tab-panel="history">
+        <section class="panel">
+          <div class="section-heading compact">
+            <div>
+              <p class="section-kicker">Projetos</p>
+              <h2>Histórico de orçamentos</h2>
+            </div>
+            <div class="history-actions">
+              <button class="secondary-button" id="historySelectAllButton" type="button">Selecionar todos</button>
+              <button class="ghost-button" id="historyClearSelectionButton" type="button">Limpar seleção</button>
+            </div>
+          </div>
+          <p class="panel-lead">Carregue orçamentos anteriores, revise lucro e monte filas recorrentes da farm.</p>
+          <div id="historySummary" class="history-summary-grid"></div>
+          <div id="historyList" class="history-list"></div>
+        </section>
+      </section>
+    </main>
+  </div>
+
+  <template id="quoteTemplate">
+Projeto: {{projectName}}
+Impressora: {{printerName}}
+Material: {{materialName}}
+Quantidade: {{quantity}}
+Complexidade: {{complexityLabel}}
+
+Custo bruto: {{grossCost}}
+Preço mínimo: {{breakEven}}
+Preço ideal: {{idealPrice}}
+Taxas estimadas: {{fees}}
+Lucro por peça: {{profitPerPiece}}
+Lucro total: {{totalProfit}}
+Margem real: {{realMargin}}
+
+Observações: {{notes}}
+Gerado em: {{generatedAt}}
+  </template>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>

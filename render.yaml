@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: precificacao-3d-pro
+    env: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/bootstrap
+    envVars:
+      - key: NODE_VERSION
+        value: 20
+      - key: PORT
+        value: 10000
+    disk:
+      name: precificacao-data
+      mountPath: /opt/render/project/src/data
+      sizeGB: 1
