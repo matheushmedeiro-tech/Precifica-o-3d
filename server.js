@@ -94,6 +94,10 @@ app.get("/api/auth/status", (request, response) => {
   response.json({ authenticated: isAuthenticated(request) });
 });
 
+app.get("/healthz", (_request, response) => {
+  response.status(200).json({ ok: true });
+});
+
 app.use("/api", (request, response, next) => {
   if (["/auth/login", "/auth/logout", "/auth/status"].includes(request.path)) {
     next();
